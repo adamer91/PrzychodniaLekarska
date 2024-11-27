@@ -86,6 +86,11 @@ public class ClinicApp extends JFrame {
         JLabel patientLabel = new JLabel("Patient Management");
         topPanel.add(patientLabel);
 
+        JButton backButton = new JButton("Back to Main Menu");
+        topPanel.add(backButton);
+        backButton.addActionListener(e -> cardLayout.show(getContentPane(), "mainMenu"));
+
+
         JPanel centerPanel = new JPanel(new GridLayout(7, 2));
         JTextField firstNameField = new JTextField();
         JTextField lastNameField = new JTextField();
@@ -153,6 +158,11 @@ public class ClinicApp extends JFrame {
         JPanel topPanel = new JPanel(new FlowLayout());
         JLabel doctorLabel = new JLabel("Doctor Management");
         topPanel.add(doctorLabel);
+
+        JButton backButton = new JButton("Back to Main Menu");
+        topPanel.add(backButton);
+        backButton.addActionListener(e -> cardLayout.show(getContentPane(), "mainMenu"));
+
 
         JPanel centerPanel = new JPanel(new GridLayout(8, 2));
         JTextField firstNameField = new JTextField();
@@ -236,6 +246,11 @@ public class ClinicApp extends JFrame {
         JLabel scheduleLabel = new JLabel("Schedule Management");
         topPanel.add(scheduleLabel);
 
+        JButton backButton = new JButton("Back to Main Menu");
+        topPanel.add(backButton);
+        backButton.addActionListener(e -> cardLayout.show(getContentPane(), "mainMenu"));
+
+
         JPanel centerPanel = new JPanel(new GridLayout(5, 2));
         JTextField idField = new JTextField();
         JTextField dateField = new JTextField();
@@ -293,6 +308,11 @@ public class ClinicApp extends JFrame {
         JPanel topPanel = new JPanel(new FlowLayout());
         JLabel appointmentLabel = new JLabel("Appointment Management");
         topPanel.add(appointmentLabel);
+
+        JButton backButton = new JButton("Back to Main Menu");
+        topPanel.add(backButton);
+        backButton.addActionListener(e -> cardLayout.show(getContentPane(), "mainMenu"));
+
 
         JPanel centerPanel = new JPanel(new GridLayout(5, 2));
         JTextField patientPeselField = new JTextField();
