@@ -14,14 +14,7 @@ public class Schedule {
         this.availability = new HashMap<>();
     }
 
-    public Doctor getDoctor() {
-        return doctor;
-    }
-
-    public Map<LocalDate, Map<LocalTime, Boolean>> getAvailability() {
-        return availability;
-    }
-
+    // Dodawanie dostępności w określonym dniu
     public void addAvailability(LocalDate date, LocalTime start, LocalTime end) {
         availability.putIfAbsent(date, new HashMap<>());
         for (LocalTime time = start; !time.isAfter(end); time = time.plusMinutes(15)) {
@@ -29,22 +22,17 @@ public class Schedule {
         }
     }
 
+    // Sprawdzanie, czy lekarz jest dostępny w określonym dniu i godzinie
     public boolean isAvailable(LocalDate date, LocalTime time) {
-        if (!availability.containsKey(date)) return false;
-        return availability.get(date).getOrDefault(time, false);
+        return availability.containsKey(date) && availability.get(date).getOrDefault(time, false);
     }
 
-    public void setBusy(LocalDate date, LocalTime time) {
-        if (availability.containsKey(date) && availability.get(date).containsKey(time)) {
-            availability.get(date).put(time, false);
-        }
+    // Pobieranie dostępności na dany dzień
+    public Map<LocalTime, Boolean> getAvailability(LocalDate date) {
+        return availability.getOrDefault(date, new HashMap<>());
     }
 
-    @Override
-    public String toString() {
-        return "Schedule{" +
-                "doctor=" + doctor +
-                ", availability=" + availability +
-                '}';
+    public Doctor getDoctor() {
+        return doctor;
     }
 }

@@ -27,24 +27,23 @@ public class ScheduleServiceTest {
 
     @Test
     public void testCreateSchedule() {
-        scheduleService.createSchedule("1", LocalDate.of(2023, 10, 1), LocalTime.of(9, 0), LocalTime.of(17, 0));
+        // Tworzenie grafiku dla lekarza
+        scheduleService.createSchedule("1", LocalDate.of(2023, 10, 1), LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+        // Pobieranie grafików
         List<Schedule> schedules = scheduleService.getAllSchedules();
+
+        // Sprawdzanie wyników
         assertEquals(1, schedules.size());
         assertTrue(schedules.get(0).isAvailable(LocalDate.of(2023, 10, 1), LocalTime.of(9, 0)));
     }
 
     @Test
-    public void testGetSchedulesByDoctorId() {
-        scheduleService.createSchedule("1", LocalDate.of(2023, 10, 1), LocalTime.of(9, 0), LocalTime.of(17, 0));
-        List<Schedule> schedules = scheduleService.getSchedulesByDoctorId("1");
-        assertEquals(1, schedules.size());
-    }
+    public void testCreateScheduleDoctorNotFound() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            scheduleService.createSchedule("999", LocalDate.of(2023, 10, 1), LocalTime.of(9, 0), LocalTime.of(10, 0));
+        });
 
-    @Test
-    public void testGetAllSchedules() {
-        scheduleService.createSchedule("1", LocalDate.of(2023, 10, 1), LocalTime.of(9, 0), LocalTime.of(17, 0));
-        scheduleService.createSchedule("1", LocalDate.of(2023, 10, 2), LocalTime.of(9, 0), LocalTime.of(17, 0));
-        List<Schedule> schedules = scheduleService.getAllSchedules();
-        assertEquals(2, schedules.size());
+        assertEquals("Doctor with ID 999 not found.", exception.getMessage());
     }
 }

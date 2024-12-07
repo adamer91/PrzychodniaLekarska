@@ -1,8 +1,5 @@
 package clinic.model;
 
-import clinic.model.Doctor;
-import clinic.model.Patient;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 

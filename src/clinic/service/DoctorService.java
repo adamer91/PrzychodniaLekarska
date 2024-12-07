@@ -1,7 +1,8 @@
 package clinic.service;
 
-import java.time.LocalDate;
 import clinic.model.Doctor;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,13 +15,20 @@ public class DoctorService {
     }
 
     public void createDoctor(String firstName, String lastName, String id, LocalDate dateOfBirth, String phoneNumber, String email) {
-        Doctor doctor = new Doctor(firstName, lastName, id, dateOfBirth, phoneNumber, email);
-        doctors.add(doctor);
+        if (findDoctorById(id).isPresent()) {
+            throw new IllegalArgumentException("Doctor with ID already exists.");
+        }
+        doctors.add(new Doctor(firstName, lastName, id, dateOfBirth, phoneNumber, email));
     }
 
     public void addSpecializationToDoctor(String doctorId, String specialization) {
-        Optional<Doctor> doctor = findDoctorById(doctorId);
-        doctor.ifPresent(d -> d.addSpecialization(specialization));
+        Optional<Doctor> doctorOptional = findDoctorById(doctorId);
+        if (doctorOptional.isPresent()) {
+            Doctor doctor = doctorOptional.get();
+            doctor.addSpecialization(specialization);
+        } else {
+            throw new IllegalArgumentException("Doctor not found.");
+        }
     }
 
     public Optional<Doctor> findDoctorById(String id) {
@@ -28,7 +36,9 @@ public class DoctorService {
     }
 
     public List<Doctor> findDoctorsBySpecialization(String specialization) {
-        return doctors.stream().filter(d -> d.getSpecializations().contains(specialization)).toList();
+        return doctors.stream()
+                .filter(doctor -> doctor.getSpecializations().contains(specialization))
+                .toList();
     }
 
     public List<Doctor> getAllDoctors() {

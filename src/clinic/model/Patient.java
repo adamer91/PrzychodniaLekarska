@@ -7,7 +7,6 @@ public class Patient {
     private final String lastName;
     private final String pesel;
     private final LocalDate dateOfBirth;
-    private final int age;
     private final String phoneNumber;
     private final String email;
 
@@ -16,7 +15,6 @@ public class Patient {
         this.lastName = lastName;
         this.pesel = pesel;
         this.dateOfBirth = dateOfBirth;
-        this.age = calculateAge(dateOfBirth);
         this.phoneNumber = phoneNumber;
         this.email = email;
     }
@@ -37,10 +35,6 @@ public class Patient {
         return dateOfBirth;
     }
 
-    public int getAge() {
-        return age;
-    }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -49,21 +43,8 @@ public class Patient {
         return email;
     }
 
-    private int calculateAge(LocalDate dateOfBirth) {
-        LocalDate currentDate = LocalDate.now();
-        return currentDate.getYear() - dateOfBirth.getYear();
-    }
-
     @Override
     public String toString() {
-        return "Patient{" +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", pesel='" + pesel + '\'' +
-                ", dateOfBirth=" + dateOfBirth +
-                ", age=" + age +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+        return firstName + " " + lastName + " (" + pesel + ")";
     }
 }
