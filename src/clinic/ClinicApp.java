@@ -10,6 +10,7 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 public class ClinicApp extends JFrame {
     private final PatientService patientService;
@@ -135,33 +136,64 @@ public class ClinicApp extends JFrame {
 
         formPanel.add(createButton);
 
-        JPanel searchPanel = new JPanel(new GridLayout(2, 2, 5, 5));
-        JTextField searchField = new JTextField();
-        JButton searchButton = new JButton("Search by Last Name");
+        JPanel searchPanelLastName = new JPanel(new GridLayout(2, 2, 5, 5));
+        JTextField searchFieldLastName = new JTextField();
+        JButton searchButtonLastName = new JButton("Search by Last Name");
 
         patientList = new JList<>();
         JScrollPane scrollPane = new JScrollPane(patientList);
 
-        searchPanel.add(new JLabel("Search by Last Name:"));
-        searchPanel.add(searchField);
-        searchPanel.add(searchButton);
+        searchPanelLastName.add(new JLabel("Search by Last Name:"));
+        searchPanelLastName.add(searchFieldLastName);
+        searchPanelLastName.add(searchButtonLastName);
 
-        searchButton.addActionListener(e -> {
-            String lastName = searchField.getText();
+        searchButtonLastName.addActionListener(e -> {
+            String lastName = searchFieldLastName.getText();
             List<clinic.model.Patient> patients = patientService.findPatientsByLastName(lastName);
             if (patients.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "No patients found with last name: " + lastName, "No Results", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 String[] patientArray = patients.stream()
-                        .map(p -> p.getFirstName() + " " + p.getLastName() + " (" + p.getPesel() + ")")
+                        .map(p -> p.getFirstName() + " " + p.getLastName() + " (" + p.getPesel() + ") " + p.getEmail() + " " + p.getPhoneNumber())
                         .toArray(String[]::new);
                 patientList.setListData(patientArray);
             }
         });
 
+        JPanel searchPanelPesel = new JPanel(new GridLayout(2, 2, 5, 5));
+        JTextField searchFieldPesel = new JTextField();
+        JButton searchButtonPesel = new JButton("Search by Pesel");
+
+        searchPanelPesel.add(new JLabel("Search by Pesel:"));
+        searchPanelPesel.add(searchFieldPesel);
+        searchPanelPesel.add(searchButtonPesel);
+
+        searchButtonPesel.addActionListener(e -> {
+            String pesel = searchFieldPesel.getText();
+            Optional<clinic.model.Patient> patient = patientService.findPatientByPesel(pesel);
+            if (patient.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No patient found with pesel: " + pesel, "No Results", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                String[] patientArray = patient.stream()
+                        .map(p -> p.getFirstName() + " " + p.getLastName() + " (" + p.getPesel() + ") " + p.getEmail() + " " + p.getPhoneNumber())
+                        .toArray(String[]::new);
+                patientList.setListData(patientArray);
+            }
+        });
+        
+        JButton refreshButton = new JButton("Refresh List");
+        refreshButton.addActionListener(e -> updatePatientList());
+
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.Y_AXIS));
+
+        southPanel.add(searchPanelLastName);
+        southPanel.add(searchPanelPesel);
+        southPanel.add(refreshButton);
+
         panel.add(topPanel, BorderLayout.NORTH);
         panel.add(formPanel, BorderLayout.CENTER);
-        panel.add(searchPanel, BorderLayout.SOUTH);
+        panel.add(southPanel, BorderLayout.SOUTH);
         panel.add(scrollPane, BorderLayout.EAST);
 
         return panel;
@@ -191,15 +223,24 @@ public class ClinicApp extends JFrame {
         JTextField lastNameField = new JTextField();
         JTextField idField = new JTextField();
         JTextField specializationField = new JTextField();
+        JTextField dateOfBirthField = new JTextField();
+        JTextField phoneField = new JTextField();
+        JTextField emailField = new JTextField();
 
         formPanel.add(new JLabel("First Name:"));
         formPanel.add(firstNameField);
         formPanel.add(new JLabel("Last Name:"));
         formPanel.add(lastNameField);
+        formPanel.add(new JLabel("Date of Birth (yyyy-MM-dd):"));
+        formPanel.add(dateOfBirthField);
+        formPanel.add(new JLabel("Phone Number:"));
+        formPanel.add(phoneField);
+        formPanel.add(new JLabel("Email:"));
+        formPanel.add(emailField);
+        formPanel.add(new JLabel("Specialization(s):"));
+        formPanel.add(specializationField);
         formPanel.add(new JLabel("ID:"));
         formPanel.add(idField);
-        formPanel.add(new JLabel("Specialization:"));
-        formPanel.add(specializationField);
 
         JButton createButton = new JButton("Create Doctor");
         createButton.addActionListener(e -> {
@@ -208,40 +249,120 @@ public class ClinicApp extends JFrame {
                         firstNameField.getText(),
                         lastNameField.getText(),
                         idField.getText(),
-                        LocalDate.now(),
-                        "123456789",
-                        "doctor@example.com"
+                        LocalDate.parse(dateOfBirthField.getText(), dateFormatter),
+                        phoneField.getText(),
+                        emailField.getText()
                 );
+                
+                try {
+                    doctorService.addSpecializationToDoctor(idField.getText(), specializationField.getText());
+                    specializationField.setText("");
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
                 JOptionPane.showMessageDialog(this, "Doctor created successfully!");
+                
+                firstNameField.setText("");
+                lastNameField.setText("");
+                idField.setText("");
+                dateOfBirthField.setText("");
+                phoneField.setText("");
+                emailField.setText("");
+
+                updateDoctorList();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-
-        JButton addSpecializationButton = new JButton("Add Specialization");
-        addSpecializationButton.addActionListener(e -> {
-            try {
-                doctorService.addSpecializationToDoctor(idField.getText(), specializationField.getText());
-                JOptionPane.showMessageDialog(this, "Specialization added successfully!");
-                specializationField.setText("");
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        formPanel.add(createButton);
-        formPanel.add(addSpecializationButton);
 
         doctorList = new JList<>();
+
+        formPanel.add(createButton);
+
+        JPanel addSpecializationPanel = new JPanel(new GridLayout(3, 2, 5, 5));
+        JTextField addSpecializationFieldID = new JTextField();
+        JTextField addSpecializationFieldSpecialization = new JTextField();
+        JButton addSpecializationButton = new JButton("Add specialization");
+
+        addSpecializationPanel.add(new JLabel("Enter doctors ID:"));
+        addSpecializationPanel.add(addSpecializationFieldID);
+        addSpecializationPanel.add(new JLabel("Enter Specialization to doctor to add:"));
+        addSpecializationPanel.add(addSpecializationFieldSpecialization);
+        addSpecializationPanel.add(addSpecializationButton);
+
+        addSpecializationButton.addActionListener(e -> {
+            String id = addSpecializationFieldID.getText();
+            String specialization = addSpecializationFieldSpecialization.getText();
+            
+            try {
+                doctorService.addSpecializationToDoctor(id, specialization);
+                JOptionPane.showMessageDialog(this, "Specialization added successfully!");
+                addSpecializationFieldSpecialization.setText("");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        JPanel searchPanelID = new JPanel(new GridLayout(2, 2, 5, 5));
+        JTextField searchFieldID = new JTextField();
+        JButton searchButtonID = new JButton("Search by ID");
+
+        searchPanelID.add(new JLabel("Search by ID:"));
+        searchPanelID.add(searchFieldID);
+        searchPanelID.add(searchButtonID);
+
+        searchButtonID.addActionListener(e -> {
+            String id = searchFieldID.getText();
+            Optional<clinic.model.Doctor> doctor = doctorService.findDoctorById(id);
+            if (doctor.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No doctor found with id: " + id, "No Results", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                String[] doctorArray = doctor.stream()
+                        .map(p -> p.getFirstName() + " " + p.getLastName() + " (" + p.getId() + ") " + p.getEmail() + " " + p.getPhoneNumber() + " " + p.getSpecializations())
+                        .toArray(String[]::new);
+                doctorList.setListData(doctorArray);
+            }
+        });
+
+        JPanel searchPanelSpecialization = new JPanel(new GridLayout(2, 2, 5, 5));
+        JTextField searchFieldSpecialization = new JTextField();
+        JButton searchButtonSpecialization = new JButton("Search by Specialization");
+
+        searchPanelSpecialization.add(new JLabel("Search by Specialization:"));
+        searchPanelSpecialization.add(searchFieldSpecialization);
+        searchPanelSpecialization.add(searchButtonSpecialization);
+
+        searchButtonSpecialization.addActionListener(e -> {
+            String specialization = searchFieldSpecialization.getText();
+            List<clinic.model.Doctor> doctor = doctorService.findDoctorsBySpecialization(specialization);
+            if (doctor.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No doctor found with specialization: " + specialization, "No Results", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                String[] doctorArray = doctor.stream()
+                        .map(p -> p.getFirstName() + " " + p.getLastName() + " (" + p.getId() + ") " + p.getEmail() + " " + p.getPhoneNumber() + " " + p.getSpecializations())
+                        .toArray(String[]::new);
+                doctorList.setListData(doctorArray);
+            }
+        });
+
         JScrollPane scrollPane = new JScrollPane(doctorList);
 
         JButton refreshButton = new JButton("Refresh List");
         refreshButton.addActionListener(e -> updateDoctorList());
 
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.Y_AXIS));
+
+        southPanel.add(addSpecializationPanel);
+        southPanel.add(searchPanelID);
+        southPanel.add(searchPanelSpecialization);
+        southPanel.add(refreshButton);
+
         panel.add(topPanel, BorderLayout.NORTH);
         panel.add(formPanel, BorderLayout.CENTER);
         panel.add(scrollPane, BorderLayout.EAST);
-        panel.add(refreshButton, BorderLayout.SOUTH);
+        panel.add(southPanel, BorderLayout.SOUTH);
 
         return panel;
     }
