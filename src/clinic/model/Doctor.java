@@ -37,6 +37,18 @@ public class Doctor {
         return lastName;
     }
 
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
     public String getId() {
         return id;
     }
@@ -47,6 +59,6 @@ public class Doctor {
 
     @Override
     public String toString() {
-        return firstName + " " + lastName + " (" + id + ") - " + specializations;
+        return firstName + " " + lastName + " (" + id + ") - " + specializations + " " + dateOfBirth + " " + email + " tel:" + phoneNumber;
     }
 }
